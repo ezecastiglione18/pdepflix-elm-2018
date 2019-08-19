@@ -1,30 +1,33 @@
 module Backend exposing(..)
 import Models exposing(Movie, Preferences)
 
-completaAca = identity
+completaAca = identity --QUE TENGO QUE COMPLETAR ACA????????
 
 -- **************
 -- Requerimiento: filtrar películas por su título a medida que se escribe en el buscador;
 -- **************
 
 filtrarPeliculasPorPalabrasClave : String -> List Movie -> List Movie
-filtrarPeliculasPorPalabrasClave palabras = List.filter (peliculaTienePalabrasClave palabras)
+filtrarPeliculasPorPalabrasClave palabras = List.filter (esIgualAlTexto palabras)
 
--- esta función la dejamos casi lista, pero tiene un pequeño bug. ¡Corregilo!
---
--- Además tiene dos problemas, que también deberías corregir:
---
--- * distingue mayúsculas de minúsculas, pero debería encontrar a "Lion King" aunque escriba "kINg"
--- * busca una coincidencia exacta, pero si escribís "Avengers Ultron" debería encontrar a "Avengers: Age Of Ultron"
---
-peliculaTienePalabrasClave palabras pelicula = String.contains "Toy" pelicula.title
+esIgualAlTexto : String -> Movie -> Bool
+esIgualAlTexto texto pelicula = any (tieneParteDelTexto texto) [pelicula.title]
+
+tieneParteDelTexto : String -> Bool
+tieneParteDelTexto text = contains (toUpper text)
+
+--QUE HACER CON LA FUNCION DE ABAJO?
+--peliculaTienePalabrasClave palabras pelicula = String.contains "Toy" pelicula.title
 
 -- **************
 -- Requerimiento: visualizar las películas según el género elegido en un selector;
 -- **************
 
 filtrarPeliculasPorGenero : String -> List Movie -> List Movie
-filtrarPeliculasPorGenero genero = completaAca
+filtrarPeliculasPorGenero genero = filter (coincideConGenero genero)
+
+coincideConGenero : String -> Movie -> Bool
+coincideConGenero genero pelicula = contains (genero) [pelicula.genre]
 
 -- **************
 -- Requerimiento: filtrar las películas que sean aptas para menores de edad,
@@ -32,21 +35,37 @@ filtrarPeliculasPorGenero genero = completaAca
 -- **************
 
 filtrarPeliculasPorMenoresDeEdad : Bool -> List Movie -> List Movie
-filtrarPeliculasPorMenoresDeEdad mostrarSoloMenores = completaAca
+filtrarPeliculasPorMenoresDeEdad mostrarSoloMenores = filter (mostrarSoloMenores)
+
+mostrarSoloMenores : Movie -> Bool
+mostrarSoloMenores pelicula = pelicula.forKids == True
+
+--NOTA: No entiendo la parte del checkbox. Que tengo que hacer con el checkbox?
 
 -- **************
 -- Requerimiento: ordenar las películas por su rating;
 -- **************
 
 ordenarPeliculasPorRating : List Movie -> List Movie
-ordenarPeliculasPorRating = completaAca
+ordenarPeliculasPorRating = List.sort(map [pelicula.rating])
 
 -- **************
 -- Requerimiento: dar like a una película
 -- **************
 
 darLikeAPelicula : Int -> List Movie -> List Movie
-darLikeAPelicula id = completaAca
+darLikeAPelicula id = map (likearPelicula id)
+
+likearPelicula : Int -> Movie -> Movie
+likearPelicula id pelicula = if idMatchs id pelicula then darleLike pelicula
+
+    idMatchs : Int -> Movie -> Bool
+    idMatchs id pelicula = id == [pelicula.id]
+
+--NOTA: Me fije en el tp de Currify que hay un idMatch que se fija si una pelicula coincide con un id
+
+    darleLike : Movie -> Movie
+    darleLike pelicula = {pelicula | liked = True}
 
 -- **************
 -- Requerimiento: cargar preferencias a través de un popup modal,
